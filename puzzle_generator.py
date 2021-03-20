@@ -1,60 +1,273 @@
+import random
 from random import shuffle
+from random import randint
 
-grid = [[0 for i in range(9)] for j in range(9)]
+def blank_grid():
+    grid = []
+    grid.append([0,0,0,0,0,0,0,0,0])
+    grid.append([0,0,0,0,0,0,0,0,0])
+    grid.append([0,0,0,0,0,0,0,0,0])
+    grid.append([0,0,0,0,0,0,0,0,0])
+    grid.append([0,0,0,0,0,0,0,0,0])
+    grid.append([0,0,0,0,0,0,0,0,0])
+    grid.append([0,0,0,0,0,0,0,0,0])
+    grid.append([0,0,0,0,0,0,0,0,0])
+    grid.append([0,0,0,0,0,0,0,0,0])
+    return grid
 
 
-class Grid:
+def print_grid(grid):
+    row = 0
+    col = 0
+    for i in grid:
+        if row % 3 == 0 and row != 0:
+            print("---------------------")
+        row += 1
 
-    def __init__(self):
-        self.grid = grid
+        for j in i:
+            print((j), end= " ")
+            col += 1
+            if col % 3 == 0 and col != 0 and col != 9:
+                print("|", end= " ")
+            elif col == 9:
+                print('')
+                col = 0
 
-    def generate_solution(self, grid):
-        #generates a full solution with backtracking
-        number_list = [1,2,3,4,5,6,7,8,9]
-        for i in range(0,81):
-            row=i//9
-            col=i%9
-            #find next empty cell
-            if grid[row][col]==0:
-                shuffle(number_list)      
-                for number in number_list:
-                    if self.valid_location(grid,row,col,number):
-                        self.path.append((number,row,col))
-                        grid[row][col]=number
-                        if not self.find_empty_square(grid):
-                            return True
-                        else:
-                            if self.generate_solution(grid):
-                                #if the grid is full
-                                return True
-                break
-        grid[row][col]=0  
-        return False
 
-def remove_numbers_from_grid(self):
-    """remove numbers from the grid to create the puzzle"""
-    #get all non-empty squares from the grid
-    non_empty_squares = self.get_non_empty_squares(self.grid)
-    non_empty_squares_count = len(non_empty_squares)
-    rounds = 3
-    while rounds > 0 and non_empty_squares_count >= 17:
-        #there should be at least 17 clues
-        row,col = non_empty_squares.pop()
-        non_empty_squares_count -= 1
-        #might need to put the square value back if there is more than one solution
-        removed_square = self.grid[row][col]
-        self.grid[row][col]=0
-        #make a copy of the grid to solve
-        grid_copy = copy.deepcopy(self.grid)
-        #initialize solutions counter to zero
-        self.counter=0      
-        self.solve_puzzle(grid_copy)   
-        #if there is more than one solution, put the last removed cell back into the grid
-        if self.counter!=1:
-            self.grid[row][col]=removed_square
-            non_empty_squares_count += 1
-            rounds -=1
-    return
+def valid(grid, value, pos):
+## grid = the the grid input from above
+## value = the value in the given cell
+## pos = y value from 0 to 8 , x value from 0 to 8
+## (row) = pos[0]
+## (col) = pos[1]
+## check row
+    for i in range(9):
+        if grid[pos[0]][i] == value and pos[1] != i:
+            return False
 
-new_grid = Grid()
-new_grid.generate_solution(grid)
+## check col
+    for i in range(9):
+        if grid[i][pos[1]] == value and pos[0] !=i:
+            return False
+
+## check boxes
+    box_x = pos[1] // 3
+    box_y = pos[0] // 3
+
+    for i in range(box_y*3, box_y*3 + 3):
+        for j in range(box_x * 3, box_x*3 + 3):
+            if grid[i][j] == value and (i,j) != pos:
+                return False
+
+    return True
+
+
+def find_empty(grid):
+    for i in range(9):
+        for j in range(9):
+            if grid[i][j] == 0:
+                return i, j ##given as position y, x
+
+    return None
+
+
+def solve(grid):
+    solved_grid = grid
+    find = find_empty(solved_grid)
+    if not find:
+        return True
+    else:
+        row, col = find ## sets the variables row and col to the closests 0 value  (y, x) in the grid
+
+    for i in range(1,10): ## finding the value from 1 to 9 for the given cell
+        if valid(solved_grid, i, (row, col)):
+            solved_grid[row][col] = i
+
+            if solve(solved_grid):
+                return True
+            
+            solved_grid[row][col] = 0
+
+    return False
+
+
+def solve_back(grid):
+    find = find_empty(grid)
+    if not find:
+        return True
+    else:
+        row, col = find ## sets the variables row and col to the closests 0 value  (y, x) in the grid
+
+    for i in range(9,0,-1): ## finding the value from 1 to 9 for the given cell
+        if valid(grid, i, (row, col)):
+            grid[row][col] = i
+
+            if solve(grid):
+                return True
+            
+            grid[row][col] = 0
+
+    return False
+
+
+def grid_fill(grid):
+
+    base_row = [1,2,3,4,5,6,7,8,9]
+    shuffle(base_row)
+
+    for i in range(9):
+        grid[0][i] = base_row[i]
+
+
+    return grid
+'''
+def make_puzzle(grid):
+## randomly remove numbers until only one possible solution remains
+    new_grid = grid
+    y = randint(0,8)
+    x = randint(0,8)
+    new_grid[y][x] = 0
+
+    solved_forward = new_grid
+    solved_backward = new_grid
+
+    solve(solved_forward)
+    solve_back(solved_backward)
+
+    grid = new_grid
+
+    if solved_forward != solved_backward:
+        return grid
+    else:
+        make_puzzle(grid)
+
+
+    while solved_forward == solved_backward:
+        y = randint(0,8)
+        x = randint(0,8)
+        new_grid[y][x] = 0
+
+        solved_forward = new_grid
+        solved_backward = new_grid
+
+        solve(solved_forward)
+        solve_back(solved_backward)    
+    else:
+        return(grid)
+    '''
+
+
+grid = blank_grid()
+print_grid(grid)
+
+solved_forward = grid
+solved_backward = grid
+
+
+def make_puzzle(empty_grid):
+    grid = empty_grid
+
+    val = randint(1,9)
+    row = randint(0,8)
+    col = randint(0,8)
+
+    while not valid(grid, val, (row, col)):
+        val = randint(1,9)
+        row = randint(0,8)
+        col = randint(0,8)
+    else:
+        grid[row][col] = val
+
+    solved_forward = grid
+    solved_backward = grid
+
+    solve(solved_forward)
+    solve_back(solved_backward)
+
+    while solved_forward != solved_backward:
+        make_puzzle(grid)
+    else:
+        return grid
+
+puzzle = make_puzzle(blank_grid())
+
+
+print('\n')
+print_grid(puzzle)
+
+
+    ## find random coordinate
+
+    ## fill coordinate with random number (that works...)
+
+    ## solve that board both ways
+
+    ## check if the solutions match
+
+    ## repeat
+
+'''
+print("\n")
+base_grid = (grid_fill(grid))
+print_grid(base_grid)
+
+print("\n")
+tobe_solved = base_grid
+solve(tobe_solved)
+solved_grid = tobe_solved
+print_grid(solved_grid)
+
+print("\n")
+puzzle = solved_grid
+
+print("\n")
+puzzle = make_puzzle(solved_grid)
+print_grid(puzzle)
+
+puzzle = solved_grid
+make_puzzle(puzzle)
+print_grid(puzzle)
+
+print("\n")
+tobe_solved_back = puzzle
+solve_back(tobe_solved_back)
+solved_back = tobe_solved_back
+print_grid(solved_back)
+
+print(solve_back == solved_grid)
+
+#Start Removing Numbers one by one
+
+#A higher number of attempts will end up removing more numbers from the grid
+#Potentially resulting in more difficiult grids to solve!
+attempts = 5 
+counter=1
+while attempts>0:
+    #Select a random cell that is not already empty
+    row = randint(0,8)
+    col = randint(0,8)
+    while puzzle[row][col]==0:
+        row = randint(0,8)
+        col = randint(0,8)
+    #Remember its cell value in case we need to put it back  
+    backup = puzzle[row][col]
+    puzzle[row][col]=0
+  
+    #Take a full copy of the grid
+    copyGrid = []
+    for r in range(0,9):
+        copyGrid.append([])
+        for c in range(0,9):
+            copyGrid[r].append(puzzle[r][c])
+  
+    #Count the number of solutions that this grid has (using a backtracking approach implemented in the solveGrid() function)
+    counter=0      
+    solve(copyGrid)   
+    #If the number of solution is different from 1 then we need to cancel the change by putting the value we took away back in the grid
+    if counter!=1:
+        puzzle[row][col]=backup
+        #We could stop here, but we can also have another attempt with a different cell just to try to remove more numbers
+        attempts -= 1
+
+print_grid(puzzle)
+'''
