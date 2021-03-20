@@ -5,17 +5,8 @@ pygame.font.init()
 
 
 class Grid:
-    board = [
-    [9,0,0,0,7,0,0,6,0],
-    [4,3,0,8,0,0,5,0,1],
-    [2,0,6,0,0,0,0,3,0],
-    [0,0,0,5,0,0,0,0,0],
-    [5,2,8,4,1,9,6,7,3],
-    [0,0,0,0,0,7,0,0,0],
-    [0,9,0,0,0,0,3,0,4],
-    [7,0,3,0,0,1,0,2,8],
-    [0,5,0,0,9,0,0,0,6]
-    ]
+    from puzzle_generator import get_puzzle
+    board = get_puzzle()
 
     def __init__(self, rows, cols, width, height):
         self.rows = rows
