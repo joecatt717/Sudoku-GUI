@@ -209,6 +209,6 @@ class SudokuGenerator:
         return
 
 ## altering the second input value changes the difficulty
-grid = SudokuGenerator(None,10)
+grid = SudokuGenerator()
 grid.print_grid
 

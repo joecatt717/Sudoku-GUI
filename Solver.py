@@ -1,5 +1,8 @@
+'''
 from puzzle_generator import get_puzzle
 board = get_puzzle()
+'''
+
 
 #I = (verticle axis) length of the board is 9 nested lists
 #"j" = (horizontal axis) each nested list has 9 parts

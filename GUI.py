@@ -1,12 +1,11 @@
 import pygame
-from Solver import solve, valid
+from Sudoku_Generator import SudokuGenerator
 import time
 pygame.font.init()
 
 
 class Grid:
-    from puzzle_generator import get_puzzle
-    board = get_puzzle()
+    board = SudokuGenerator().grid
 
     def __init__(self, rows, cols, width, height):
         self.rows = rows
@@ -26,7 +25,7 @@ class Grid:
             self.cubes[row][col].set(val)
             self.update_model()
 
-            if valid(self.model, val, (row, col)) and solve(self.model):
+            if valid_location(self.model, row, col, val) and solve_puzzle(self.model):
                 return True
             else:
                 self.cubes[row][col].set(0)
