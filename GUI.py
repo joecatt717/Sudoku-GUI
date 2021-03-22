@@ -4,17 +4,23 @@ import time
 pygame.font.init()
 
 
-class Grid:
-    board = SudokuGenerator().grid
+class Grid(SudokuGenerator):
 
-    def __init__(self, rows, cols, width, height):
+    x = SudokuGenerator()
+    board = x.grid
+
+    def __init__(self, rows, cols, width, height, win):
+
         self.rows = rows
         self.cols = cols
         self.cubes = [[Cube(self.board[i][j], i, j, width, height) for j in range(cols)] for i in range(rows)]
         self.width = width
         self.height = height
         self.model = None
+        self.update_model()
         self.selected = None
+        self.win = win
+        self.counter = 0
 
     def update_model(self):
         self.model = [[self.cubes[i][j].value for j in range(self.cols)] for i in range(self.rows)]
@@ -25,7 +31,7 @@ class Grid:
             self.cubes[row][col].set(val)
             self.update_model()
 
-            if valid_location(self.model, row, col, val) and solve_puzzle(self.model):
+            if valid(self.model, val, (row,col)) and self.solve():
                 return True
             else:
                 self.cubes[row][col].set(0)
@@ -87,6 +93,25 @@ class Grid:
         return True
 
 
+    def solve(self):
+        find = find_empty(self.model)
+        if not find:
+            return True
+        else:
+            row, col = find
+
+        for i in range(1, 10):
+            if valid(self.model, i, (row, col)):
+                self.model[row][col] = i
+
+                if self.solve():
+                    return True
+
+                self.model[row][col] = 0
+
+        return False
+
+
 class Cube:
     rows = 9
     cols = 9
@@ -124,6 +149,38 @@ class Cube:
         self.temp = val
 
 
+def find_empty(board):
+    for i in range(len(board)):
+        for j in range(len(board[0])):
+            if board[i][j] == 0:
+                return (i, j) # row, col
+
+    return None
+
+
+def valid(board, num, pos):
+    #check row
+    for i in range(len(board[0])):
+        if board[pos[0]][i] == num and pos[1] != i:
+            return False
+
+    #check column
+    for i in range(len(board)):
+        if board[i][pos[1]] == num and pos[0] != i:
+            return False
+
+    #check box
+    box_x = pos[1] // 3
+    box_y = pos[0] // 3
+
+    for i in range(box_y*3, box_y*3 + 3):
+        for j in range(box_x * 3, box_x*3 + 3):
+            if board[i][j] == num and (i,j) != pos:
+                return False
+
+    return True
+
+
 def redraw_window(win, board, time, strikes):
     win.fill((255,255,255))
     # Draw (time)
@@ -147,7 +204,7 @@ def format_time(secs):
 def main():
     win = pygame.display.set_mode((540,600))
     pygame.display.set_caption("Sudoku")
-    board = Grid(9,9,540,540)
+    board = Grid(9,9,540,540,win)
     key = None
     run = True
     start = time.time()

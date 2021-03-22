@@ -181,7 +181,7 @@ class SudokuGenerator:
         
 
     def remove_numbers_from_grid(self):
-        '''remove numbers from the grid to creat the puzzle'''
+        '''remove numbers from the grid to create the puzzle'''
         #get all non-empty squares from the grid
         non_empty_squares = self.get_non_empty_squares(self.grid)
         non_empty_squares_count = len(non_empty_squares)
@@ -208,7 +208,13 @@ class SudokuGenerator:
                 rounds -= 1
         return
 
-## altering the second input value changes the difficulty
-grid = SudokuGenerator()
-grid.print_grid
 
+
+
+## altering the second input value changes the difficulty
+x = SudokuGenerator(None, 5)
+puzzle = x.grid
+
+x.solve_input_sudoku()
+solved_board = x.grid
+print(solved_board)
